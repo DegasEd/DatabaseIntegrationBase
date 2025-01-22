@@ -1,6 +1,14 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.DatabaseIntegrationBase_ApiService>("apiservice");
+var sql = builder.AddSqlServer("sql")
+                .WithLifetime(ContainerLifetime.Persistent);
+                 
+var sqldb = sql.AddDatabase("sqldb", "master");
+
+
+var apiService = builder.AddProject<Projects.DatabaseIntegrationBase_ApiService>("apiservice")
+                        .WithReference(sqldb)
+                        .WaitFor(sqldb);
 
 builder.AddProject<Projects.DatabaseIntegrationBase_Web>("webfrontend")
     .WithExternalHttpEndpoints()
